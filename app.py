@@ -4,7 +4,7 @@ import numpy as np
 from datetime import date
 
 st.set_page_config(
-    page_title="ContaLab — Simulador contable",
+    page_title="ContaLab — Simulador contable PGC",
     page_icon="📘",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -126,31 +126,53 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# --------------------------------------------------------------------
+# Catálogo de cuentas PGC (resumido para docencia)
+# --------------------------------------------------------------------
 ACCOUNT_CATALOG = [
-    {"codigo": "100", "cuenta": "Caja", "tipo": "Activo corriente", "estado": "Balance"},
-    {"codigo": "101", "cuenta": "Bancos", "tipo": "Activo corriente", "estado": "Balance"},
-    {"codigo": "110", "cuenta": "Clientes", "tipo": "Activo corriente", "estado": "Balance"},
-    {"codigo": "120", "cuenta": "Existencias", "tipo": "Activo corriente", "estado": "Balance"},
-    {"codigo": "150", "cuenta": "Inmovilizado material", "tipo": "Activo no corriente", "estado": "Balance"},
-    {"codigo": "159", "cuenta": "Amortización acumulada inmovilizado", "tipo": "Activo no corriente (-)", "estado": "Balance"},
-    {"codigo": "170", "cuenta": "HP IVA soportado", "tipo": "Activo corriente", "estado": "Balance"},
-    {"codigo": "180", "cuenta": "Gastos anticipados", "tipo": "Activo corriente", "estado": "Balance"},
-    {"codigo": "200", "cuenta": "Capital social", "tipo": "Patrimonio neto", "estado": "Balance"},
-    {"codigo": "210", "cuenta": "Reservas", "tipo": "Patrimonio neto", "estado": "Balance"},
-    {"codigo": "220", "cuenta": "Resultado del ejercicio", "tipo": "Patrimonio neto", "estado": "Balance"},
-    {"codigo": "300", "cuenta": "Proveedores", "tipo": "Pasivo corriente", "estado": "Balance"},
-    {"codigo": "310", "cuenta": "Deudas a corto plazo", "tipo": "Pasivo corriente", "estado": "Balance"},
-    {"codigo": "320", "cuenta": "Deudas a largo plazo", "tipo": "Pasivo no corriente", "estado": "Balance"},
-    {"codigo": "330", "cuenta": "HP IVA repercutido", "tipo": "Pasivo corriente", "estado": "Balance"},
-    {"codigo": "400", "cuenta": "Ventas", "tipo": "Ingreso", "estado": "PyG"},
-    {"codigo": "401", "cuenta": "Otros ingresos", "tipo": "Ingreso", "estado": "PyG"},
-    {"codigo": "500", "cuenta": "Compras", "tipo": "Gasto", "estado": "PyG"},
-    {"codigo": "510", "cuenta": "Sueldos y salarios", "tipo": "Gasto", "estado": "PyG"},
-    {"codigo": "520", "cuenta": "Alquileres", "tipo": "Gasto", "estado": "PyG"},
-    {"codigo": "530", "cuenta": "Suministros", "tipo": "Gasto", "estado": "PyG"},
-    {"codigo": "540", "cuenta": "Amortización del inmovilizado", "tipo": "Gasto", "estado": "PyG"},
-    {"codigo": "550", "cuenta": "Gastos financieros", "tipo": "Gasto", "estado": "PyG"},
-    {"codigo": "560", "cuenta": "Impuesto sobre beneficios", "tipo": "Gasto", "estado": "PyG"},
+    # Activo no corriente (Grupo 2)
+    {"codigo": "200", "cuenta": "Propiedad industrial", "tipo": "Activo no corriente", "estado": "Balance"},
+    {"codigo": "210", "cuenta": "Inmovilizado material", "tipo": "Activo no corriente", "estado": "Balance"},
+    {"codigo": "281", "cuenta": "Amortización acumulada del inmovilizado", "tipo": "Activo no corriente (-)", "estado": "Balance"},
+
+    # Activo corriente (Grupos 3, 4, 5)
+    {"codigo": "300", "cuenta": "Mercaderías", "tipo": "Activo corriente", "estado": "Balance"},
+    {"codigo": "430", "cuenta": "Clientes", "tipo": "Activo corriente", "estado": "Balance"},
+    {"codigo": "436", "cuenta": "Clientes, efectos comerciales a cobrar", "tipo": "Activo corriente", "estado": "Balance"},
+    {"codigo": "570", "cuenta": "Caja", "tipo": "Activo corriente", "estado": "Balance"},
+    {"codigo": "572", "cuenta": "Bancos c/c", "tipo": "Activo corriente", "estado": "Balance"},
+
+    # Patrimonio neto (Grupo 1)
+    {"codigo": "100", "cuenta": "Capital social", "tipo": "Patrimonio neto", "estado": "Balance"},
+    {"codigo": "113", "cuenta": "Reservas voluntarias", "tipo": "Patrimonio neto", "estado": "Balance"},
+    {"codigo": "120", "cuenta": "Resultados de ejercicios anteriores", "tipo": "Patrimonio neto", "estado": "Balance"},
+    {"codigo": "129", "cuenta": "Resultado del ejercicio", "tipo": "Patrimonio neto", "estado": "Balance"},
+
+    # Pasivo no corriente (Grupo 1 y 5 largo plazo)
+    {"codigo": "170", "cuenta": "Deudas a largo plazo con entidades de crédito", "tipo": "Pasivo no corriente", "estado": "Balance"},
+
+    # Pasivo corriente (Grupo 4 y 5 corto plazo)
+    {"codigo": "400", "cuenta": "Proveedores", "tipo": "Pasivo corriente", "estado": "Balance"},
+    {"codigo": "410", "cuenta": "Acreedores por prestaciones de servicios", "tipo": "Pasivo corriente", "estado": "Balance"},
+    {"codigo": "520", "cuenta": "Deudas a corto plazo con entidades de crédito", "tipo": "Pasivo corriente", "estado": "Balance"},
+
+    # Grupo 6 – Compras y gastos (PyG)
+    {"codigo": "600", "cuenta": "Compras de mercaderías", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "610", "cuenta": "Variación de existencias de mercaderías", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "621", "cuenta": "Arrendamientos y cánones", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "628", "cuenta": "Suministros", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "640", "cuenta": "Sueldos y salarios", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "642", "cuenta": "Seguridad Social a cargo de la empresa", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "662", "cuenta": "Intereses de deudas", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "681", "cuenta": "Amortización del inmovilizado", "tipo": "Gasto", "estado": "PyG"},
+    {"codigo": "630", "cuenta": "Impuesto sobre beneficios", "tipo": "Gasto", "estado": "PyG"},
+
+    # Grupo 7 – Ventas e ingresos (PyG)
+    {"codigo": "700", "cuenta": "Ventas de mercaderías", "tipo": "Ingreso", "estado": "PyG"},
+    {"codigo": "705", "cuenta": "Prestaciones de servicios", "tipo": "Ingreso", "estado": "PyG"},
+    {"codigo": "752", "cuenta": "Ingresos por arrendamientos", "tipo": "Ingreso", "estado": "PyG"},
+    {"codigo": "759", "cuenta": "Otros ingresos de gestión", "tipo": "Ingreso", "estado": "PyG"},
+    {"codigo": "769", "cuenta": "Otros ingresos financieros", "tipo": "Ingreso", "estado": "PyG"},
 ]
 
 CATALOG_DF = pd.DataFrame(ACCOUNT_CATALOG)
@@ -159,34 +181,154 @@ CODE_TO_NAME = dict(zip(CATALOG_DF["codigo"], CATALOG_DF["cuenta"]))
 CODE_TO_TYPE = dict(zip(CATALOG_DF["codigo"], CATALOG_DF["tipo"]))
 CODE_TO_STATE = dict(zip(CATALOG_DF["codigo"], CATALOG_DF["estado"]))
 
+# --------------------------------------------------------------------
+# Plantillas PGC de Balance y PyG (modelo docente simplificado)
+# --------------------------------------------------------------------
+
+BALANCE_TEMPLATE = [
+    # Activo no corriente
+    ("ACTIVO NO CORRIENTE", "", ""),
+    ("ANC1", "Inmovilizado intangible", "ANint"),
+    ("ANC2", "Inmovilizado material", "ANmat"),
+    ("ANC3", "Amortización acumulada inmovilizado", "ANamort"),
+
+    # Activo corriente
+    ("ACTIVO CORRIENTE", "", ""),
+    ("AC1", "Existencias", "ACexis"),
+    ("AC2", "Deudores comerciales y otras cuentas a cobrar", "ACdeu"),
+    ("AC3", "Efectivo y otros activos líquidos equivalentes", "ACefec"),
+
+    # Patrimonio neto
+    ("PATRIMONIO NETO", "", ""),
+    ("PN1", "Capital", "PNcap"),
+    ("PN2", "Reservas", "PNres"),
+    ("PN3", "Resultados de ejercicios anteriores", "PNrea"),
+    ("PN4", "Resultado del ejercicio", "PNre"),
+
+    # Pasivo no corriente
+    ("PASIVO NO CORRIENTE", "", ""),
+    ("PNC1", "Deudas a largo plazo", "PNCdeu"),
+
+    # Pasivo corriente
+    ("PASIVO CORRIENTE", "", ""),
+    ("PC1", "Proveedores y otras cuentas a pagar", "PCprov"),
+    ("PC2", "Deudas a corto plazo", "PCdeuc"),
+]
+
+# Mapeo simple de cuentas PGC a epígrafes de balance
+ACCOUNT_TO_BALANCE_EPIG = {
+    # Inmovilizado intangible / material
+    "200": "ANC1",
+    "210": "ANC2",
+    "281": "ANC3",
+
+    # Existencias
+    "300": "AC1",
+
+    # Clientes / deudores
+    "430": "AC2",
+    "436": "AC2",
+
+    # Efectivo y bancos
+    "570": "AC3",
+    "572": "AC3",
+
+    # Patrimonio neto
+    "100": "PN1",
+    "113": "PN2",
+    "120": "PN3",
+    "129": "PN4",
+
+    # Deudas LP
+    "170": "PNC1",
+
+    # Proveedores, acreedores y deudas CP
+    "400": "PC1",
+    "410": "PC1",
+    "520": "PC2",
+}
+
+# Plantilla PyG tipo PGC (muy resumida) [web:83][web:95]
+PYG_TEMPLATE = [
+    ("1", "Importe neto de la cifra de negocios"),
+    ("2", "Aprovisionamientos"),
+    ("3", "Otros ingresos de explotación"),
+    ("4", "Gastos de personal"),
+    ("5", "Otros gastos de explotación"),
+    ("6", "Amortización del inmovilizado"),
+    ("7", "Resultado de explotación"),
+    ("8", "Ingresos financieros"),
+    ("9", "Gastos financieros"),
+    ("10", "Resultado financiero"),
+    ("11", "Resultado antes de impuestos"),
+    ("12", "Impuesto sobre beneficios"),
+    ("13", "Resultado del ejercicio"),
+]
+
+# Mapeo cuentas PGC -> epígrafe PyG
+ACCOUNT_TO_PYG_LINE = {
+    # Ingresos de explotación
+    "700": "1",
+    "705": "1",
+
+    # Aprovisionamientos
+    "600": "2",
+    "610": "2",
+
+    # Otros ingresos de explotación
+    "752": "3",
+    "759": "3",
+
+    # Gastos de personal
+    "640": "4",
+    "642": "4",
+
+    # Otros gastos de explotación
+    "621": "5",
+    "628": "5",
+
+    # Amortización
+    "681": "6",
+
+    # Ingresos financieros
+    "769": "8",
+
+    # Gastos financieros
+    "662": "9",
+
+    # Impuesto
+    "630": "12",
+}
+
+
 EXERCISES = [
     {
         "titulo": "Aportación inicial de socios",
-        "descripcion": "La empresa recibe 20.000 € en banco como aportación inicial de capital.",
+        "descripcion": "La sociedad se constituye con 20.000 € ingresados en la cuenta bancaria.",
         "fecha": date(2026, 1, 2),
-        "lineas": [("101", 20000.0, 0.0), ("200", 0.0, 20000.0)],
+        "lineas": [("572", 20000.0, 0.0), ("100", 0.0, 20000.0)],
         "explicacion": "Aumenta el activo (bancos) y también el patrimonio neto (capital social).",
     },
     {
         "titulo": "Compra de mercaderías al contado",
-        "descripcion": "Se compran existencias por 2.500 € y se pagan por banco.",
+        "descripcion": "Se compran mercaderías por 2.500 € que se pagan por banco.",
         "fecha": date(2026, 1, 5),
-        "lineas": [("120", 2500.0, 0.0), ("101", 0.0, 2500.0)],
-        "explicacion": "No cambia el total del activo, solo su composición: suben existencias y baja banco.",
+        "lineas": [("300", 2500.0, 0.0), ("572", 0.0, 2500.0)],
+        "explicacion": "Suben existencias y baja la tesorería (banco).",
     },
     {
-        "titulo": "Venta a crédito",
-        "descripcion": "Se venden mercaderías por 4.000 € a clientes pendientes de cobro.",
+        "titulo": "Venta de mercaderías a crédito",
+        "descripcion": "Se venden mercaderías por 4.000 € a clientes, pendiente de cobro.",
         "fecha": date(2026, 1, 10),
-        "lineas": [("110", 4000.0, 0.0), ("400", 0.0, 4000.0)],
-        "explicacion": "Sube clientes en el activo y aparece un ingreso que mejora el resultado.",
+        "lineas": [("430", 4000.0, 0.0), ("700", 0.0, 4000.0)],
+        "explicacion": "Sube el crédito a clientes y se reconoce un ingreso de explotación.",
     },
     {
         "titulo": "Registro de nóminas",
-        "descripcion": "Se pagan salarios por 1.200 € desde banco.",
+        "descripcion": "Nóminas del mes por 1.200 € pagadas por banco.",
         "fecha": date(2026, 1, 31),
-        "lineas": [("510", 1200.0, 0.0), ("101", 0.0, 1200.0)],
-        "explicacion": "El gasto reduce el resultado del ejercicio y baja la tesorería.",
+        "lineas": [("640", 1200.0, 0.0), ("572", 0.0, 1200.0)],
+        "explicacion": "Gasto de personal que reduce el resultado y la tesorería.",
     },
 ]
 
@@ -255,73 +397,137 @@ def compute_trial_balance(journal_df):
     ]
 
 
-def compute_balance_and_pyg(trial_df):
+def compute_balance_pgc(trial_df):
+    """
+    Devuelve balance en formato PGC simplificado, siempre con todos los epígrafes.
+    """
+    # Partimos de los saldos netos por cuenta
     if trial_df.empty:
         trial_df = compute_trial_balance(pd.DataFrame())
 
-    balance_df = trial_df.copy()
-    balance_df["Saldo"] = balance_df["Saldo deudor"] - balance_df["Saldo acreedor"]
+    df = trial_df.copy()
+    df["Saldo"] = df["Saldo deudor"] - df["Saldo acreedor"]
 
-    income_total = balance_df.loc[balance_df["Estado"] == "PyG", :].copy()
-    ingresos = income_total.loc[income_total["Tipo"] == "Ingreso", "Saldo"].sum() * -1
-    gastos = income_total.loc[income_total["Tipo"] == "Gasto", "Saldo"].sum()
-    resultado = ingresos - gastos
+    # Acumular por epígrafe de balance
+    epig_importes = {code: 0.0 for code, _, _ in BALANCE_TEMPLATE}
 
-    balance_rows = []
-    for _, row in balance_df.iterrows():
-        if row["Estado"] == "Balance":
-            saldo = row["Saldo"]
-            if row["Tipo"] == "Activo no corriente (-)":
-                saldo = saldo
-            balance_rows.append({"Tipo": row["Tipo"], "Cuenta": row["Cuenta"], "Saldo": saldo})
+    for _, row in df.iterrows():
+        codigo = row["Código"]
+        saldo = row["Saldo"]
+        epig = ACCOUNT_TO_BALANCE_EPIG.get(codigo)
+        if not epig:
+            continue
+        # Activo: saldo deudor positivo, patrimonio/pasivo: presentamos cantidades positivas
+        if row["Tipo"] in ["Activo corriente", "Activo no corriente", "Activo no corriente (-)"]:
+            importe = saldo
+        else:
+            importe = -saldo  # patrimonio/pasivo: para que se vea positivo
+        epig_importes[epig] += importe
 
-    balance_out = pd.DataFrame(balance_rows)
-    if balance_out.empty:
-        balance_out = pd.DataFrame(columns=["Tipo", "Cuenta", "Saldo"])
+    # Construir DataFrame final siguiendo plantilla
+    rows = []
+    for code, label, internal in BALANCE_TEMPLATE:
+        if code in ["ACTIVO NO CORRIENTE", "ACTIVO CORRIENTE", "PATRIMONIO NETO", "PASIVO NO CORRIENTE", "PASIVO CORRIENTE"]:
+            rows.append({"Clave": code, "Epígrafe": label, "Importe": None})
+        else:
+            imp = epig_importes.get(code, 0.0)
+            rows.append({"Clave": code, "Epígrafe": label, "Importe": imp})
 
-    if not balance_out.empty:
-        balance_out = pd.concat(
-            [
-                balance_out,
-                pd.DataFrame(
-                    [{"Tipo": "Patrimonio neto", "Cuenta": "Resultado del ejercicio", "Saldo": -resultado}]
-                ),
-            ],
-            ignore_index=True,
-        )
+    balance_pgc = pd.DataFrame(rows)
+    # Totales
+    activo_total = balance_pgc.loc[balance_pgc["Clave"].str.startswith("AC") | balance_pgc["Clave"].str.startswith("ANC"), "Importe"].sum()
+    pn_total = balance_pgc.loc[balance_pgc["Clave"].str.startswith("PN"), "Importe"].sum()
+    pasivo_total = balance_pgc.loc[balance_pgc["Clave"].str.startswith("PNC") | balance_pgc["Clave"].str.startswith("PC"), "Importe"].sum()
+    return balance_pgc, activo_total, pn_total + pasivo_total
 
-    pyg_out = pd.DataFrame(
-        [
-            {"Concepto": "Ingresos", "Importe": ingresos},
-            {"Concepto": "Gastos", "Importe": gastos},
-            {"Concepto": "Resultado del ejercicio", "Importe": resultado},
-        ]
+
+def compute_pyg_pgc(trial_df):
+    """
+    Devuelve PyG en formato PGC simplificado (líneas siempre visibles).
+    """
+    if trial_df.empty:
+        trial_df = compute_trial_balance(pd.DataFrame())
+
+    df = trial_df.copy()
+    df["Saldo"] = df["Saldo deudor"] - df["Saldo acreedor"]
+    pyg_accounts = df[df["Estado"] == "PyG"].copy()
+
+    line_importes = {code: 0.0 for code, _ in PYG_TEMPLATE}
+
+    for _, row in pyg_accounts.iterrows():
+        codigo = row["Código"]
+        saldo = row["Saldo"]
+        line_key = ACCOUNT_TO_PYG_LINE.get(codigo)
+        if not line_key:
+            continue
+        if row["Tipo"] == "Ingreso":
+            importe = -saldo
+        else:
+            importe = saldo
+        line_importes[line_key] += importe
+
+    # Subtotales
+    importe_neto_ventas = line_importes["1"]
+    aprovisionamientos = line_importes["2"]
+    otros_ingresos_expl = line_importes["3"]
+    gastos_personal = line_importes["4"]
+    otros_gastos_expl = line_importes["5"]
+    amortizacion = line_importes["6"]
+
+    resultado_explotacion = (
+        importe_neto_ventas
+        + otros_ingresos_expl
+        - aprovisionamientos
+        - gastos_personal
+        - otros_gastos_expl
+        - amortizacion
     )
-    return balance_out, pyg_out, resultado
+
+    ingresos_financieros = line_importes["8"]
+    gastos_financieros = line_importes["9"]
+    resultado_financiero = ingresos_financieros - gastos_financieros
+    resultado_antes_impuestos = resultado_explotacion + resultado_financiero
+    impuesto = line_importes["12"]
+    resultado_ejercicio = resultado_antes_impuestos - impuesto
+
+    rows = []
+    for code, label in PYG_TEMPLATE:
+        if code == "7":
+            imp = resultado_explotacion
+        elif code == "10":
+            imp = resultado_financiero
+        elif code == "11":
+            imp = resultado_antes_impuestos
+        elif code == "13":
+            imp = resultado_ejercicio
+        else:
+            imp = line_importes.get(code, 0.0)
+        rows.append({"Clave": code, "Epígrafe": label, "Importe": imp})
+
+    pyg_pgc = pd.DataFrame(rows)
+    return pyg_pgc, resultado_ejercicio
 
 
-def compute_ratios(balance_df, pyg_df):
-    def sum_type(tipo):
-        if balance_df.empty:
-            return 0.0
-        return balance_df.loc[balance_df["Tipo"] == tipo, "Saldo"].sum()
+def compute_ratios(balance_pgc, pyg_pgc):
+    """
+    Ratios básicos a partir de balance y PyG PGC.
+    """
+    def get_importe(clave):
+        v = pyg_pgc.loc[pyg_pgc["Clave"] == clave, "Importe"]
+        return float(v.iloc[0]) if not v.empty else 0.0
 
-    activo_corriente = sum_type("Activo corriente")
-    activo_no_corriente = sum_type("Activo no corriente") + sum_type("Activo no corriente (-)")
-    patrimonio = sum_type("Patrimonio neto") * -1
-    pasivo_corriente = sum_type("Pasivo corriente") * -1
-    pasivo_no_corriente = sum_type("Pasivo no corriente") * -1
-    existencias = (
-        balance_df.loc[balance_df["Cuenta"] == "Existencias", "Saldo"].sum() if not balance_df.empty else 0.0
-    )
-    bancos = (
-        balance_df.loc[balance_df["Cuenta"].isin(["Caja", "Bancos"]), "Saldo"].sum()
-        if not balance_df.empty
-        else 0.0
-    )
-    activo_total = activo_corriente + activo_no_corriente
-    ingresos = pyg_df.loc[pyg_df["Concepto"] == "Ingresos", "Importe"].sum()
-    resultado = pyg_df.loc[pyg_df["Concepto"] == "Resultado del ejercicio", "Importe"].sum()
+    # Activo corriente: epígrafes AC1, AC2, AC3
+    activo_corriente = balance_pgc.loc[balance_pgc["Clave"].isin(["AC1", "AC2", "AC3"]), "Importe"].sum()
+    # Pasivo corriente: PC1, PC2
+    pasivo_corriente = balance_pgc.loc[balance_pgc["Clave"].isin(["PC1", "PC2"]), "Importe"].sum()
+    existencias = balance_pgc.loc[balance_pgc["Clave"] == "AC1", "Importe"].sum()
+    bancos_caja = balance_pgc.loc[balance_pgc["Clave"] == "AC3", "Importe"].sum()
+    pn_total = balance_pgc.loc[balance_pgc["Clave"].str.startswith("PN"), "Importe"].sum()
+    pasivo_total = balance_pgc.loc[balance_pgc["Clave"].str.startswith("PNC") | balance_pgc["Clave"].str.startswith("PC"), "Importe"].sum()
+    activo_total = balance_pgc.loc[balance_pgc["Clave"].str.startswith("AC") | balance_pgc["Clave"].str.startswith("ANC"), "Importe"].sum()
+
+    resultado_ejercicio = get_importe("13")
+    ingresos_explotacion = get_importe("1") + get_importe("3")
 
     def safe_div(a, b):
         return a / b if b not in [0, 0.0, None] else np.nan
@@ -329,11 +535,11 @@ def compute_ratios(balance_df, pyg_df):
     ratios = pd.DataFrame(
         [
             {"Ratio": "Liquidez corriente", "Fórmula": "Activo corriente ÷ Pasivo corriente", "Valor": safe_div(activo_corriente, pasivo_corriente)},
-            {"Ratio": "Prueba ácida", "Fórmula": "(Activo corriente − Existencias) ÷ Pasivo corriente", "Valor": safe_div(activo_corriente - existencias, pasivo_corriente)},
-            {"Ratio": "Tesorería", "Fórmula": "(Caja + Bancos) ÷ Pasivo corriente", "Valor": safe_div(bancos, pasivo_corriente)},
-            {"Ratio": "Endeudamiento", "Fórmula": "Pasivo total ÷ Patrimonio neto", "Valor": safe_div(pasivo_corriente + pasivo_no_corriente, patrimonio)},
-            {"Ratio": "ROA", "Fórmula": "Resultado ÷ Activo total", "Valor": safe_div(resultado, activo_total)},
-            {"Ratio": "Margen neto", "Fórmula": "Resultado ÷ Ingresos", "Valor": safe_div(resultado, ingresos)},
+            {"Ratio": "Prueba ácida", "Fórmula": "(AC corr. − Existencias) ÷ Pasivo corriente", "Valor": safe_div(activo_corriente - existencias, pasivo_corriente)},
+            {"Ratio": "Tesorería", "Fórmula": "Efectivo ÷ Pasivo corriente", "Valor": safe_div(bancos_caja, pasivo_corriente)},
+            {"Ratio": "Endeudamiento", "Fórmula": "Pasivo total ÷ Patrimonio neto", "Valor": safe_div(pasivo_total, pn_total)},
+            {"Ratio": "ROA", "Fórmula": "Resultado ejercicio ÷ Activo total", "Valor": safe_div(resultado_ejercicio, activo_total)},
+            {"Ratio": "Margen neto", "Fórmula": "Resultado ejercicio ÷ Ingresos de explotación", "Valor": safe_div(resultado_ejercicio, ingresos_explotacion)},
         ]
     )
     return ratios
@@ -352,16 +558,16 @@ def compute_cash_flow(journal_df):
 
     flow = {"Explotación": 0.0, "Inversión": 0.0, "Financiación": 0.0}
     for asiento_id, grp in journal_df.groupby("Asiento"):
-        cash_codes = {"100", "101"}
+        cash_codes = {"570", "572"}
         touch_cash = grp[grp["Código"].isin(cash_codes)]
         if touch_cash.empty:
             continue
         cash_effect = touch_cash["Debe"].sum() - touch_cash["Haber"].sum()
         other_codes = set(grp[~grp["Código"].isin(cash_codes)]["Código"].tolist())
 
-        if other_codes & {"150", "159"}:
+        if other_codes & {"210", "281"}:
             flow["Inversión"] += cash_effect
-        elif other_codes & {"200", "210", "310", "320", "550"}:
+        elif other_codes & {"100", "113", "170", "520", "662"}:
             flow["Financiación"] += cash_effect
         else:
             flow["Explotación"] += cash_effect
@@ -400,8 +606,11 @@ init_state()
 st.markdown(
     """
     <div class='hero-card'>
-        <h1 style='margin-bottom:0.35rem;'>ContaLab — simulador contable para estudiantes</h1>
-        <div class='small-note'>Introduce asientos y observa al instante cómo cambian el libro diario, el mayor, el balance de comprobación, el balance, la cuenta de pérdidas y ganancias, el flujo de efectivo y los ratios.</div>
+        <h1 style='margin-bottom:0.35rem;'>ContaLab — simulador contable PGC</h1>
+        <div class='small-note'>
+        Introduce asientos con cuentas PGC reales y observa al instante el impacto en el libro diario, el mayor, el balance de comprobación, 
+        el balance en formato PGC y la cuenta de pérdidas y ganancias oficial.
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -410,10 +619,9 @@ st.markdown(
 with st.expander("Guía rápida", expanded=False):
     st.markdown(
         """
-- Añade líneas al asiento y comprueba que el total del Debe coincide con el Haber.
-- Guarda el asiento y revisa el impacto en las pestañas de estados contables.
-- Usa los ejercicios guiados para cargar casos base y estudiar su efecto.
-- Descarga los asientos en CSV si quieres guardarlos o reutilizarlos.
+- Usa cuentas como 570 Caja, 572 Bancos, 430 Clientes, 400 Proveedores, 600 Compras, 700 Ventas, etc.
+- Guarda el asiento y revisa el impacto en el balance y la PyG en formato PGC.
+- Los estados se muestran siempre completos (todas las líneas) aunque no tengan importe.
         """
     )
 
@@ -491,7 +699,7 @@ with left:
 with right:
     st.markdown("### Ejercicios guiados")
     st.markdown(
-        "<div class='soft-card'>Selecciona un caso y cárgalo como asiento modelo o úsalo para practicar manualmente.</div>",
+        "<div class='soft-card'>Selecciona un caso y cárgalo como asiento modelo o añádelo directamente al diario.</div>",
         unsafe_allow_html=True,
     )
     selected_ex = st.selectbox("Caso práctico", options=[ex["titulo"] for ex in EXERCISES])
@@ -537,44 +745,32 @@ with right:
 
 journal_df = build_journal_df(st.session_state.journal)
 trial_df = compute_trial_balance(journal_df)
-balance_df, pyg_df, resultado = compute_balance_and_pyg(trial_df)
-ratios_df = compute_ratios(balance_df, pyg_df)
+
+balance_pgc, activo_total, pn_pasivo_total = compute_balance_pgc(trial_df)
+pyg_pgc, resultado = compute_pyg_pgc(trial_df)
+ratios_df = compute_ratios(balance_pgc, pyg_pgc)
 cf_df = compute_cash_flow(journal_df)
 
 entries_count = len(st.session_state.journal)
 cuadra_global = journal_df["Debe"].sum() == journal_df["Haber"].sum() if not journal_df.empty else True
-activo_total = (
-    balance_df.loc[balance_df["Tipo"].str.contains("Activo", na=False), "Saldo"].sum()
-    if not balance_df.empty
-    else 0.0
-)
-pasivo_pn_total = (
-    balance_df.loc[
-        balance_df["Tipo"].isin(["Pasivo corriente", "Pasivo no corriente", "Patrimonio neto"]),
-        "Saldo",
-    ].sum()
-    * -1
-    if not balance_df.empty
-    else 0.0
-)
 
 m1, m2, m3, m4 = st.columns(4)
 with m1:
     metric_card("Asientos registrados", str(entries_count), "Libro diario activo")
 with m2:
-    metric_card("Resultado del ejercicio", amount_fmt(resultado), "Según PyG actual")
+    metric_card("Resultado del ejercicio", amount_fmt(resultado), "Según PyG PGC")
 with m3:
-    metric_card("Activo total", amount_fmt(activo_total), "Balance actual")
+    metric_card("Activo total", amount_fmt(activo_total), "Balance PGC")
 with m4:
-    metric_card("Balance cuadrado", "Sí" if cuadra_global else "No", amount_fmt(activo_total - pasivo_pn_total))
+    metric_card("Balance cuadrado", "Sí" if cuadra_global else "No", amount_fmt(activo_total - pn_pasivo_total))
 
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
     [
         "Libro diario",
         "Libro mayor",
         "Balance comprobación",
-        "Balance",
-        "PyG",
+        "Balance PGC",
+        "PyG PGC",
         "Ratios",
         "Flujo efectivo",
     ]
@@ -631,36 +827,24 @@ with tab3:
         )
 
 with tab4:
-    st.markdown("### Balance de situación")
-    if balance_df.empty:
-        st.info("Sin movimientos todavía.")
-    else:
-        sections = [
-            "Activo corriente",
-            "Activo no corriente",
-            "Activo no corriente (-)",
-            "Patrimonio neto",
-            "Pasivo no corriente",
-            "Pasivo corriente",
-        ]
-        for sec in sections:
-            sec_df = balance_df[balance_df["Tipo"] == sec].copy()
-            if not sec_df.empty:
-                st.markdown(f"#### {sec}")
-                show_df = sec_df.copy()
-                show_df["Saldo"] = show_df["Saldo"].map(amount_fmt)
-                st.dataframe(show_df[["Cuenta", "Saldo"]], use_container_width=True, hide_index=True)
-        st.caption(
-            f"Activo total: {amount_fmt(activo_total)} | Patrimonio neto + Pasivo: {amount_fmt(pasivo_pn_total)}"
-        )
+    st.markdown("### Balance en formato PGC (simplificado)")
+    bal_show = balance_pgc.copy()
+    bal_show["Importe"] = bal_show["Importe"].apply(
+        lambda x: "" if x is None else amount_fmt(x)
+    )
+    st.dataframe(bal_show[["Epígrafe", "Importe"]], use_container_width=True, hide_index=True)
+    st.caption(
+        f"Activo total: {amount_fmt(activo_total)} | Patrimonio neto + Pasivo: {amount_fmt(pn_pasivo_total)}"
+    )
 
 with tab5:
-    st.markdown("### Cuenta de pérdidas y ganancias")
-    pyg_show = pyg_df.copy()
+    st.markdown("### Cuenta de pérdidas y ganancias en formato PGC (simplificado)")
+    pyg_show = pyg_pgc.copy()
     pyg_show["Importe"] = pyg_show["Importe"].map(amount_fmt)
-    st.dataframe(pyg_show, use_container_width=True, hide_index=True)
+    st.dataframe(pyg_show[["Epígrafe", "Importe"]], use_container_width=True, hide_index=True)
     st.caption(
-        "Los ingresos se generan a partir de cuentas de tipo ingreso y los gastos a partir de cuentas de tipo gasto."
+        "La estructura sigue el modelo PGC: resultado de explotación, resultado financiero, "
+        "resultado antes de impuestos e impuesto sobre beneficios."
     )
 
 with tab6:
