@@ -158,19 +158,19 @@ st.markdown(
 # Catálogo de cuentas PGC (resumido para docencia)
 # --------------------------------------------------------------------
 ACCOUNT_CATALOG = [
-    # Activo no corriente (Grupo 2)
+    # Activo no corriente
     {"codigo": "200", "cuenta": "Propiedad industrial", "tipo": "Activo no corriente", "estado": "Balance"},
     {"codigo": "210", "cuenta": "Inmovilizado material", "tipo": "Activo no corriente", "estado": "Balance"},
     {"codigo": "281", "cuenta": "Amortización acumulada del inmovilizado", "tipo": "Activo no corriente (-)", "estado": "Balance"},
 
-    # Activo corriente (Grupos 3, 4, 5)
+    # Activo corriente
     {"codigo": "300", "cuenta": "Mercaderías", "tipo": "Activo corriente", "estado": "Balance"},
     {"codigo": "430", "cuenta": "Clientes", "tipo": "Activo corriente", "estado": "Balance"},
     {"codigo": "436", "cuenta": "Clientes, efectos comerciales a cobrar", "tipo": "Activo corriente", "estado": "Balance"},
     {"codigo": "570", "cuenta": "Caja", "tipo": "Activo corriente", "estado": "Balance"},
     {"codigo": "572", "cuenta": "Bancos c/c", "tipo": "Activo corriente", "estado": "Balance"},
 
-    # Patrimonio neto (Grupo 1)
+    # Patrimonio neto
     {"codigo": "100", "cuenta": "Capital social", "tipo": "Patrimonio neto", "estado": "Balance"},
     {"codigo": "113", "cuenta": "Reservas voluntarias", "tipo": "Patrimonio neto", "estado": "Balance"},
     {"codigo": "120", "cuenta": "Resultados de ejercicios anteriores", "tipo": "Patrimonio neto", "estado": "Balance"},
@@ -424,7 +424,7 @@ def compute_balance_pgc(trial_df):
         balance_pgc["Clave"].str.startswith("PNC") | balance_pgc["Clave"].str.startswith("PC"),
         "Importe",
     ].sum()
-    return balance_pgc, activo_total, pn_total + pasivo_total
+    return balance_pgc, activo_total, pn_total + pasivo_total, df
 
 
 def compute_pyg_pgc(trial_df):
@@ -733,7 +733,7 @@ with right:
 journal_df = build_journal_df(st.session_state.journal)
 trial_df = compute_trial_balance(journal_df)
 
-balance_pgc, activo_total, pn_pasivo_total = compute_balance_pgc(trial_df)
+balance_pgc, activo_total, pn_pasivo_total, balance_raw_df = compute_balance_pgc(trial_df)
 pyg_pgc, resultado = compute_pyg_pgc(trial_df)
 ratios_df = compute_ratios(balance_pgc, pyg_pgc)
 cf_df = compute_cash_flow(journal_df)
@@ -871,6 +871,21 @@ with tab4:
     st.caption(
         f"Activo total: {amount_fmt(activo_total)} | Patrimonio neto + Pasivo: {amount_fmt(pn_pasivo_total)}"
     )
+
+    st.markdown("#### Detalle de cuentas de balance")
+    if balance_raw_df.empty:
+        st.info("Sin movimientos de balance todavía.")
+    else:
+        detail = balance_raw_df.copy()
+        detail["Saldo"] = detail["Saldo deudor"] - detail["Saldo acreedor"]
+        detail["Epígrafe PGC"] = detail["Código"].map(ACCOUNT_TO_BALANCE_EPIG).fillna("—")
+        detail_show = detail[["Epígrafe PGC", "Código", "Cuenta", "Tipo", "Saldo"]].copy()
+        detail_show["Saldo"] = detail_show["Saldo"].map(amount_fmt)
+        st.dataframe(detail_show, use_container_width=True, hide_index=True)
+        st.caption(
+            "Esta tabla muestra todas las cuentas de balance y el epígrafe PGC en el que se integran "
+            "(por ejemplo, las deudas con entidades de crédito: 170 a largo plazo, 520 a corto plazo)."
+        )
 
 with tab5:
     st.markdown("### Cuenta de pérdidas y ganancias (formato PGC)")
