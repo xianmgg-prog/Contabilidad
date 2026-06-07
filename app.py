@@ -321,6 +321,10 @@ EXERCISES = [
     },
 ]
 
+# --------------------------------------------------------------------
+# Funciones generales
+# --------------------------------------------------------------------
+
 
 def init_state():
     if "journal" not in st.session_state:
@@ -563,6 +567,95 @@ def compute_cash_flow(journal_df):
     data.append({"Actividad": "Flujo neto", "Flujo": sum(flow.values())})
     return pd.DataFrame(data)
 
+# --------------------------------------------------------------------
+# Amortizaciones: métodos lineal, porcentaje constante y unidades
+# --------------------------------------------------------------------
+
+
+def amortizacion_lineal(coste, valor_residual, vida):
+    base = coste - valor_residual
+    if vida <= 0 or base <= 0:
+        return pd.DataFrame(columns=["Año", "Cuota", "Amortización acumulada", "Valor neto"])
+
+    cuota = base / vida
+    rows = []
+    acum = 0.0
+    valor = coste
+    for year in range(1, vida + 1):
+        if year == vida:
+            cuota_year = valor - valor_residual
+        else:
+            cuota_year = cuota
+        acum += cuota_year
+        valor -= cuota_year
+        rows.append(
+            {
+                "Año": year,
+                "Cuota": cuota_year,
+                "Amortización acumulada": acum,
+                "Valor neto": valor,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def amortizacion_porcentaje_constante(coste, valor_residual, vida, porcentaje):
+    if porcentaje <= 0 or porcentaje >= 1:
+        return pd.DataFrame(columns=["Año", "Cuota", "Amortización acumulada", "Valor neto"])
+
+    rows = []
+    acum = 0.0
+    valor = coste
+    year = 1
+    while valor > valor_residual and year <= vida:
+        cuota = (valor - valor_residual) * porcentaje
+        if valor - cuota < valor_residual:
+            cuota = valor - valor_residual
+        acum += cuota
+        valor -= cuota
+        rows.append(
+            {
+                "Año": year,
+                "Cuota": cuota,
+                "Amortización acumulada": acum,
+                "Valor neto": valor,
+            }
+        )
+        year += 1
+    return pd.DataFrame(rows)
+
+
+def amortizacion_unidades_produccion(coste, valor_residual, unidades_totales, unidades_por_anio):
+    base = coste - valor_residual
+    if unidades_totales <= 0 or base <= 0:
+        return pd.DataFrame(columns=["Año", "Cuota", "Amortización acumulada", "Valor neto"])
+
+    rows = []
+    acum = 0.0
+    valor = coste
+    for i, uds in enumerate(unidades_por_anio, start=1):
+        cuota = base * (uds / unidades_totales)
+        if valor - cuota < valor_residual:
+            cuota = valor - valor_residual
+        acum += cuota
+        valor -= cuota
+        rows.append(
+            {
+                "Año": i,
+                "Cuota": cuota,
+                "Amortización acumulada": acum,
+                "Valor neto": valor,
+            }
+        )
+        if valor <= valor_residual:
+            break
+
+    return pd.DataFrame(rows)
+
+# --------------------------------------------------------------------
+# Gestión de asientos
+# --------------------------------------------------------------------
+
 
 def add_entry(fecha, concepto, lineas):
     new_id = len(st.session_state.journal) + 1
@@ -587,6 +680,10 @@ def exercise_to_entry(ex):
         "lineas": [{"codigo": c, "debe": d, "haber": h} for c, d, h in ex["lineas"]],
     }
 
+
+# --------------------------------------------------------------------
+# UI principal
+# --------------------------------------------------------------------
 
 init_state()
 
@@ -751,7 +848,7 @@ with m3:
 with m4:
     metric_card("Balance cuadrado", "Sí" if cuadra_global else "No", amount_fmt(activo_total - pn_pasivo_total))
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(
     [
         "Libro diario",
         "Libro mayor",
@@ -760,6 +857,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
         "PyG PGC",
         "Ratios",
         "Flujo efectivo",
+        "Amortizaciones",
     ]
 )
 
@@ -935,3 +1033,72 @@ with tab7:
     cf_show["Flujo"] = cf_show["Flujo"].map(amount_fmt)
     st.dataframe(cf_show, use_container_width=True, hide_index=True)
     st.caption("Clasificación orientativa para uso didáctico: explotación, inversión y financiación.")
+
+with tab8:
+    st.markdown("### Calculadora de amortizaciones")
+
+    st.markdown(
+        "<div class='soft-card'>Elige el método de amortización y los parámetros del activo para ver el cuadro año a año.</div>",
+        unsafe_allow_html=True,
+    )
+
+    metodo = st.selectbox(
+        "Método de amortización",
+        options=["Lineal", "Porcentaje constante (degresivo)", "Unidades de producción"],
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        coste = st.number_input("Coste de adquisición", min_value=0.0, value=10000.0, step=500.0)
+        valor_residual = st.number_input("Valor residual", min_value=0.0, value=0.0, step=100.0)
+    with col2:
+        vida_util = st.number_input("Vida útil (años)", min_value=1, value=5, step=1)
+
+    df_amort = pd.DataFrame()
+
+    if metodo == "Lineal":
+        df_amort = amortizacion_lineal(coste, valor_residual, int(vida_util))
+
+    elif metodo == "Porcentaje constante (degresivo)":
+        porcentaje_anual = st.slider("Porcentaje anual", min_value=5, max_value=50, value=20, step=1)
+        df_amort = amortizacion_porcentaje_constante(
+            coste,
+            valor_residual,
+            int(vida_util),
+            porcentaje_anual / 100.0,
+        )
+
+    else:  # Unidades de producción
+        unidades_totales = st.number_input("Unidades totales previstas", min_value=1.0, value=100000.0, step=1000.0)
+        st.caption("Introduce las unidades por año (separadas por comas): por ejemplo 20000, 25000, 30000, 15000, 10000.")
+        unidades_str = st.text_input("Unidades por año", value="20000, 25000, 30000, 15000, 10000")
+        try:
+            unidades_lista = [float(x.strip()) for x in unidades_str.split(",") if x.strip() != ""]
+        except ValueError:
+            unidades_lista = []
+            st.error("Revisa el formato de las unidades por año (usa solo números y comas).")
+
+        if unidades_lista:
+            df_amort = amortizacion_unidades_produccion(
+                coste,
+                valor_residual,
+                unidades_totales,
+                unidades_lista,
+            )
+
+    if df_amort is not None and not df_amort.empty:
+        df_show = df_amort.copy()
+        for col in ["Cuota", "Amortización acumulada", "Valor neto"]:
+            df_show[col] = df_show[col].map(amount_fmt)
+
+        st.markdown("#### Cuadro de amortización")
+        st.dataframe(df_show, use_container_width=True, hide_index=True)
+
+        st.download_button(
+            "Descargar cuadro en CSV",
+            data=df_amort.to_csv(index=False).encode("utf-8-sig"),
+            file_name="cuadro_amortizacion_contalab.csv",
+            mime="text/csv",
+        )
+    else:
+        st.info("Introduce parámetros válidos para ver el cuadro de amortización.")
